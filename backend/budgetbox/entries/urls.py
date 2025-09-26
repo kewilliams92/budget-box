@@ -1,15 +1,10 @@
-# entries/urls.py
 from django.urls import path
 
-from .views import AddExpenseStream, AddIncomeStream, GetBudget, UpdateExpenseStream
+from .views import BudgetView, ExpenseStreamView, IncomeStreamView, BudgetListView
 
 urlpatterns = [
-    path("budget/", GetBudget.as_view(), name="getbudget"),
-    path("income-stream/", AddIncomeStream.as_view(), name="addincomestream"),
-    path("expense-stream/", AddExpenseStream.as_view(), name="addexpensestream"),
-    path(
-        "partial-expense-stream/",
-        UpdateExpenseStream.as_view(),
-        name="updateexpensestream",
-    ),
+    path("budget/", BudgetView.as_view(), name="budget"),
+    path("budgets/", BudgetListView.as_view(), name="budget-list"),
+    path("income-stream/", IncomeStreamView.as_view(), name="incomestream"),
+    path("expense-stream/", ExpenseStreamView.as_view(), name="expensestream"),
 ]

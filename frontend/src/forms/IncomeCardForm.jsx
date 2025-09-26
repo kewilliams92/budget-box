@@ -8,33 +8,36 @@ import {
   Card,
   CardContent,
   CardActions,
-  InputAdornment, // Added InputAdornment import
+  InputAdornment,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuthenticatedApi } from "../services/hooks";
+import {
+  createIncomeStream,
+  updateIncomeStream,
+} from "../services/entriesService";
 
 export default function IncomeCardForm({
   onCancel,
   onSubmit,
   sx,
   initialData,
+  budgetId,
 }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("monthly");
+  const [category, setCategory] = useState("work_income");
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  const { getToken } = useAuth();
+  const { api } = useAuthenticatedApi();
 
-  // Populate form fields with initial data when editing
   useEffect(() => {
     if (initialData) {
       setName(initialData.merchant_name || "");
-      setAmount(String(Math.abs(initialData.amount)) || ""); // Convert amount to positive string
-      setCategory(initialData.category || "monthly");
+      setAmount(String(Math.abs(initialData.amount)) || "");
+      setCategory(initialData.category || "work_income");
       setDescription(initialData.description || "");
     }
   }, [initialData]);
@@ -66,58 +69,23 @@ export default function IncomeCardForm({
     setErrors(next);
     if (Object.keys(next).length) return;
 
-    const localObj = {
-      id: (initialData?.id || crypto?.randomUUID?.()) ?? String(Date.now()), // Keep the same ID if editing
-      merchant_name: name.trim(),
-      amount: Math.abs(amtNum),
-      description: description.trim() || undefined,
-      type: "income",
-      category,
-    };
-
-    let serverId = null;
+    setSubmitting(true);
     try {
-      const token =
-        (typeof getToken === "function" ? await getToken() : null) ||
-        (window?.Clerk?.session?.getToken
-          ? await window.Clerk.session.getToken()
-          : null);
-
       const payload = {
         merchant_name: name.trim(),
         description: description.trim() || "",
-        amount: Math.abs(amtNum), // backend forces positive for income anyway
-        category: category, // backend casts truthy to True
-        // date omitted: server defaults to current month
+        amount: Math.abs(amtNum),
+        category: category,
+        budget_id: budgetId,
       };
 
-      let resp;
+      let serverData;
       if (initialData?.id) {
-        resp = await axios.put(
-          "http://localhost:8000/api/entries/partial-expense-stream/",
-          { ...payload, id: initialData.id },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        serverData = await updateIncomeStream(api, initialData.id, payload);
       } else {
-        resp = await axios.post(
-          "http://localhost:8000/api/entries/income-stream/",
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        serverData = await createIncomeStream(api, payload);
       }
 
-      // Map server response back to frontend format
-      const serverData = resp.data;
       const finalObj = {
         id: serverData.id,
         name: serverData.merchant_name,

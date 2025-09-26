@@ -6,9 +6,8 @@ from .views import (
     GetTransactions,
     RefreshTransactions,
     Transactions,
+    UnlinkBankAccount,
 )
-
-# api/plaid/
 
 urlpatterns = [
     path("create-link-token/", CreateLinkToken.as_view(), name="create_link_token"),
@@ -20,10 +19,15 @@ urlpatterns = [
     path("get-transactions/", GetTransactions.as_view(), name="get_transactions"),
     path(
         "transactions/", Transactions.as_view(), name="transactions"
-    ),  # All CRUD operations
+    ),
     path(
         "refresh-transactions/",
         RefreshTransactions.as_view(),
         name="refresh_transactions",
+    ),
+    path(
+        "unlink-bank-account/",
+        UnlinkBankAccount.as_view(),
+        name="unlink_bank_account",
     ),
 ]

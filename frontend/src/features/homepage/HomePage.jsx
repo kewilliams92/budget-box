@@ -1,29 +1,26 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Container } from "@mui/material";
 
 import SignedOutPage from "./SignedOutPage";
 import SignedInPage from "./SignedInPage";
 
-
-
 export default function HomePage() {
-    const BG_COLOR = "#285744ff";
+    const BG_COLOR = "#285744";
   return (
     <>
         <Box
       sx={{
         minHeight: "100vh",
         width: "100%",
-        bgcolor: BG_COLOR,
+        backgroundColor: BG_COLOR,
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
-        py: 5, // space above/below the container so mint is visible
+        py: 5,
       }}
     >
 
-      {/* everything inside of container */}
       <Container
-        maxWidth="md"
+        maxWidth="lg"
         sx={{
           borderRadius: "2%",
           mt: 5,
@@ -31,7 +28,7 @@ export default function HomePage() {
           height: "auto",
           bgcolor: "white",
           border: "1px solid #ccc",
-          padding: 2,
+          padding: 3,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",

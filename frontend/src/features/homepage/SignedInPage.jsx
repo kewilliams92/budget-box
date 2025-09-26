@@ -1,4 +1,3 @@
-// SignedInPage.jsx
 import { SignedIn, UserButton } from "@clerk/clerk-react";
 import { Box, Typography } from "@mui/material";
 import BudgetTabs from "../budgetpage/BudgetTabs";
@@ -19,16 +18,7 @@ export default function SignedInPage() {
         }}
       >
         <UserButton>
-          {/* Add custom items to the dropdown */}
           <UserButton.MenuItems>
-            {/* <UserButton.MenuItem
-              label="Connect bank account"
-              onClick={() => ready && open()}
-            />
-            <UserButton.MenuItem
-              label="Account settings"
-              onClick={() => navigate("/account")}
-            /> */}
           </UserButton.MenuItems>
         </UserButton>
       </Box>

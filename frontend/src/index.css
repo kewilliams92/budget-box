@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* Global styles for BudgetBox */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #285744 !important;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: #285744;
+}

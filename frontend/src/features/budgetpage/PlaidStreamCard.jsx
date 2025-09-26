@@ -30,26 +30,24 @@ export default function PlaidStreamCard({
   const isIncome = type === "income";
   const hasDescription = !!description?.trim();
   const [open, setOpen] = useState(false);
-  const [approveLoading, setApproveLoading] = useState(false); // Separate state for approve button
-  const [deleteLoading, setDeleteLoading] = useState(false); // Separate state for delete button
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleApprove = async () => {
     setApproveLoading(true);
-    // console.log("APPROVE_LOADING IS SET")
     try {
-      await onApprove?.(id); // Call the onApprove function
+      await onApprove?.(id);
     } finally {
-      setApproveLoading(false); // Reset loading state
+      setApproveLoading(false);
     }
   };
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    // console.log("DELETE_LOADING IS SET")
     try {
-      await onDelete?.(id); // Call the onDelete function
+      await onDelete?.(id);
     } finally {
-      setDeleteLoading(false); // Reset loading state
+      setDeleteLoading(false);
     }
   };
 
@@ -63,12 +61,10 @@ export default function PlaidStreamCard({
         ...sx,
       }}
     >
-      {/* Toggle details by clicking content (buttons won't toggle) */}
       <CardContent
         onClick={() => hasDescription && setOpen((v) => !v)}
         sx={{ cursor: hasDescription ? "pointer" : "default", pb: 1.5 }}
       >
-        {/* Header */}
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -117,7 +113,6 @@ export default function PlaidStreamCard({
           <Typography fontWeight={500}>{date}</Typography>
         </Stack>
 
-        {/* Collapsible description */}
         <Collapse in={open && hasDescription} timeout="auto" unmountOnExit>
           <Box
             sx={{
@@ -142,17 +137,16 @@ export default function PlaidStreamCard({
         <Divider sx={{ mt: 2 }} />
       </CardContent>
 
-      {/* Buttons */}
       <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
         <IconButton
-          disabled={approveLoading || deleteLoading} // Disable if either button is loading
+          disabled={approveLoading || deleteLoading}
           aria-label="approve"
           onClick={handleApprove}
         >
           <CheckIcon />
         </IconButton>
         <IconButton
-          disabled={approveLoading || deleteLoading} // Disable if either button is loading
+          disabled={approveLoading || deleteLoading}
           aria-label="delete"
           onClick={handleDelete}
         >

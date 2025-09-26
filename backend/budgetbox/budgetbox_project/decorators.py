@@ -1,9 +1,7 @@
-#budgetbox_project/decorators.py
 from functools import wraps
 
 import requests
 from clerk_backend_api import Clerk
-from django.conf import settings
 from django.http import JsonResponse
 from jose import jwk, jwt
 from jwt import PyJWTError
@@ -12,16 +10,15 @@ from rest_framework.response import Response
 
 from budgetbox_project.settings import CLERK_ISSUER, CLERK_JWKS_URLS, CLERK_SECRET_KEY
 
-# Initialize Clerk
-# Clerk.api_key = settings.CLERK_SECRET_KEY
 
-
+# NOTE: Fetches JSON Web Key Set from Clerk's JWKS endpoint for JWT verification
 def get_jwks():
-    response = requests.get(CLERK_JWKS_URLS)
+    response = requests.get(CLERK_JWKS_URLS, timeout=10)
     response.raise_for_status()
     return response.json()
 
 
+# NOTE: Extracts the correct public key from JWKS using the key ID (kid) from JWT header
 def get_public_keys(kid):
     jwks = get_jwks()
     for key in jwks["keys"]:
@@ -30,6 +27,7 @@ def get_public_keys(kid):
     raise ValueError("Invalid Token")
 
 
+# NOTE: Decodes and verifies JWT token using RS256 algorithm with Clerk's public key
 def decode_token(token):
     try:
         headers = jwt.get_unverified_headers(token)
@@ -44,14 +42,20 @@ def decode_token(token):
         )
         return payload
     except PyJWTError as e:
-        raise ValueError(f"Token verification failed: {str(e)}")
+        raise ValueError(f"Token verification failed: {str(e)}") from e
 
 
+# NOTE: Decorator that validates Clerk JWT tokens and adds clerk_user_id to request object
 def clerk_auth_required(view_func):
     @wraps(view_func)
     def wrapped_view(self, request, *args, **kwargs):
-        # Get token from Authorization header
         auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return Response(
+                {"error": "Authorization header missing"},
+                status=s.HTTP_401_UNAUTHORIZED,
+            )
 
         if not auth_header.startswith("Bearer "):
             return Response(
@@ -59,6 +63,7 @@ def clerk_auth_required(view_func):
                 status=s.HTTP_401_UNAUTHORIZED,
             )
 
+        # NOTE: Extract JWT token from "Bearer <token>" format
         token = auth_header.split(" ")[1]
 
         try:
@@ -69,7 +74,7 @@ def clerk_auth_required(view_func):
                     {"Error": "user_id not found in token."},
                     status=s.HTTP_404_NOT_FOUND,
                 )
-            # Verify the session token with Clerk
+            # NOTE: Verify token with Clerk SDK and extract user details for request
             clerk_sdk = Clerk(bearer_auth=CLERK_SECRET_KEY)
             user_details = clerk_sdk.users.get(user_id=user_id)
             request.clerk_user_id = user_details.id

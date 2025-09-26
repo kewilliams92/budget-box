@@ -9,12 +9,11 @@ import App from "./App.jsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { UserPlaidProvider } from "./context/UserPlaidContext.jsx";
+import { UserBudgetProvider } from "./context/UserBudgetContext.jsx";
 import { UserEntriesProvider } from "./context/UserEntriesContext.jsx";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-// if (import.meta.env.DEV) {
-//   console.log("PUBLISHABLE_KEY", PUBLISHABLE_KEY);
-// }
+
 if (!PUBLISHABLE_KEY) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
 }
@@ -23,11 +22,13 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Router>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <UserPlaidProvider>
-          <UserEntriesProvider>
-          <App />
-          </UserEntriesProvider>
-        </UserPlaidProvider>
+        <UserBudgetProvider>
+          <UserPlaidProvider>
+            <UserEntriesProvider>
+              <App />
+            </UserEntriesProvider>
+          </UserPlaidProvider>
+        </UserBudgetProvider>
       </ClerkProvider>
     </Router>
   </StrictMode>,

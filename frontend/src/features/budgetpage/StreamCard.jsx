@@ -42,12 +42,10 @@ export default function StreamCard({
         ...sx,
       }}
     >
-      {/* Toggle details by clicking content (buttons won't toggle) */}
       <CardContent
         onClick={() => hasDescription && setOpen((v) => !v)}
         sx={{ cursor: hasDescription ? "pointer" : "default", pb: 1.5 }}
       >
-        {/* Header */}
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -100,7 +98,6 @@ export default function StreamCard({
           </Typography>
         </Stack>
 
-        {/* Collapsible description */}
         <Collapse in={open && hasDescription} timeout="auto" unmountOnExit>
           <Box
             sx={{
@@ -125,7 +122,6 @@ export default function StreamCard({
         <Divider sx={{ mt: 2 }} />
       </CardContent>
 
-      {/* Buttons */}
       <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
         <IconButton aria-label="edit" onClick={() => onEdit?.(id)}>
           <EditIcon />

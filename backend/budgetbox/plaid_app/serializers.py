@@ -1,10 +1,8 @@
-# plaid/serializers.py
 from rest_framework import serializers
 
 from .models import BankAccount, Transaction
 
 
-# NOTE: Serializer for displaying bank account information in API responses
 class BankAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankAccount
@@ -23,7 +21,6 @@ class BankAccountSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-# NOTE: Primary serializer for displaying transaction data with related bank account info
 class TransactionSerializer(serializers.ModelSerializer):
     bank_account_name = serializers.CharField(
         source="bank_account.account_name", read_only=True
@@ -51,7 +48,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "plaid_transaction_id", "created_at", "updated_at"]
 
 
-# NOTE: Serializer for updating specific transaction fields via PUT method
 class TransactionUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating transaction details"""
 
@@ -60,7 +56,6 @@ class TransactionUpdateSerializer(serializers.ModelSerializer):
         fields = ["merchant_name", "category", "authorized_date", "date_paid"]
 
 
-# NOTE: Serializer for approving transactions to create ExpenseStream entries via POST method
 class TransactionApprovalSerializer(serializers.Serializer):
     """Serializer for approving a transaction to create an ExpenseStream entry"""
 
@@ -71,7 +66,6 @@ class TransactionApprovalSerializer(serializers.Serializer):
     # recurrence = serializers.BooleanField(required=False, default=False)
 
     def validate_transaction_id(self, value: int) -> int:
-        """Basic validation - full validation happens in view with user context"""
         if value <= 0:
             raise serializers.ValidationError(
                 "Transaction ID must be a positive integer."

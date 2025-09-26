@@ -1,4 +1,3 @@
-// ExpenseCardForm.jsx - Fixed version
 import {
   Box,
   TextField,
@@ -11,14 +10,19 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuthenticatedApi } from "../services/hooks";
+import {
+  createExpenseStream,
+  updateExpenseStream,
+} from "../services/entriesService";
 
 export default function ExpenseCardForm({
   onCancel,
   onSubmit,
   sx,
   initialData,
+  budgetDate,
+  budgetId,
 }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -27,7 +31,7 @@ export default function ExpenseCardForm({
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  const { getToken } = useAuth();
+  const { api } = useAuthenticatedApi();
 
   useEffect(() => {
     if (initialData) {
@@ -62,44 +66,21 @@ export default function ExpenseCardForm({
 
     setSubmitting(true);
     try {
-      const token = await getToken();
-
       const payload = {
         merchant_name: name.trim(),
         description: description.trim() || "",
-        amount: -Math.abs(amtNum), // Backend will make it negative
+        amount: -Math.abs(amtNum),
         category: category,
-        // date omitted: backend will default to current month
+        ...(budgetId ? { budget_id: budgetId } : budgetDate ? { date: budgetDate } : {}),
       };
 
-      // Use update endpoint if editing existing expense
-      let resp;
+      let serverData;
       if (initialData?.id) {
-        resp = await axios.put(
-          "http://localhost:8000/api/entries/partial-expense-stream/",
-          { ...payload, id: initialData.id },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        serverData = await updateExpenseStream(api, initialData.id, payload);
       } else {
-        resp = await axios.post(
-          "http://localhost:8000/api/entries/expense-stream/",
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        serverData = await createExpenseStream(api, payload);
       }
 
-      // Map server response back to frontend format
-      const serverData = resp.data;
       const finalObj = {
         id: serverData.id,
         name: serverData.merchant_name,
@@ -256,4 +237,3 @@ export default function ExpenseCardForm({
     </Card>
   );
 }
-

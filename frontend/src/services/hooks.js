@@ -1,28 +1,39 @@
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
+import { useEffect, useMemo, useRef } from "react";
 
-// Single custom hook that returns authenticated axios instance.  See usage example in BudgetForm.jsx
 export const useAuthenticatedApi = (template = "BudgetBox") => {
-  const { getToken, isSignedIn } = useAuth({ template }); //The template is where our user's auth tokens are stored on the Clerk dashboard.
+  const { getToken, isSignedIn } = useAuth({ template });
 
-  //By creating a custom axios instance, we can intercept requests and add the auth header to our different requests to the backend
-  //See https://axios-http.com/docs/instance
-  const api = axios.create();
+  const api = useMemo(() => axios.create(), []);
 
-  api.interceptors.request.use(
-    async (config) => {
-      try {
-        const token = await getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+  // NOTE: Ensure we only add one interceptor to prevent memory leaks
+  const interceptorIdRef = useRef(null);
+  useEffect(() => {
+    if (interceptorIdRef.current != null) return;
+    const id = api.interceptors.request.use(
+      async (config) => {
+        try {
+          const token = await getToken();
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+          return config;
+        } catch (error) {
+          console.error("Failed to get auth token:", error);
+          return config;
         }
-        return config;
-      } catch (error) {
-        console.error("Failed to get auth token:", error);
+      },
+      (error) => Promise.reject(error),
+    );
+    interceptorIdRef.current = id;
+    return () => {
+      if (interceptorIdRef.current != null) {
+        api.interceptors.request.eject(interceptorIdRef.current);
+        interceptorIdRef.current = null;
       }
-    },
-    (error) => Promise.reject(error),
-  );
+    };
+  }, [api, getToken]);
 
   return { api, isSignedIn };
 };

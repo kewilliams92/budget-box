@@ -1,8 +1,5 @@
 from django.conf import settings
 from django.db import models
-
-
-# Create your models here.
 class BankAccount(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bank_accounts"
@@ -18,14 +15,13 @@ class BankAccount(models.Model):
     account_subtype = models.CharField(max_length=50)
     mask = models.CharField(
         max_length=10, blank=True
-    )  # last 4 digits of account number
+    )
 
     institution_name = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
 
-    # NOTE: Based off of Plaid's documentation, a cursor represents the last update requested by the user.  We must store this for future syncs. Without this, we cannot ensure we don't duplicate transactions
-    sync_cursor = models.TextField(blank=True, null=True)  # Stores Plaid's sync cursor
-    last_synced = models.DateTimeField(blank=True, null=True)  # Track when last synced
+    sync_cursor = models.TextField(blank=True, null=True)
+    last_synced = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,26 +41,19 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     merchant_name = models.CharField(max_length=255)
 
-    # Use authorized_date as primary field (more accurate than posted date)
     authorized_date = models.DateField(null=True)
-    # Keep date_paid for reference but not required
     date_paid = models.DateField(blank=True, null=True)
 
     category = models.CharField(max_length=100, blank=True, default="Uncategorized")
     
-    # CRITICAL: plaid_transaction_id is the primary key for sync operations
-    # This is how Plaid tracks added/modified/removed transactions in sync responses
     plaid_transaction_id = models.CharField(max_length=255, unique=True)
-    
-    # Store account_id for reference but sync uses plaid_transaction_id for tracking
     plaid_account_id = models.CharField(max_length=255, blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # Track when transaction was last modified
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-authorized_date"]
-        # I removed complex constraints and let Plaid's sync handle deduplication via transaction_id
         indexes = [
             models.Index(fields=['user', 'authorized_date']),
             models.Index(fields=['plaid_account_id']),
@@ -88,7 +77,6 @@ def create_bank_account_from_plaid(
         mask=account_data.get("mask", ""),
         institution_name=institution_name,
     )
-    print(bank_account, "INFO")
     return bank_account
 
 

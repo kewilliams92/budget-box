@@ -13,3 +13,4 @@ backend/budgetbox/budgetbox_project/.env
 backend/budgetbox/plaid_app/migrations/
 backend/budgetbox/entries/migrations/
 backend/budgetbox/clerk_app/migrations/
+avante.md

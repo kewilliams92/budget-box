@@ -26,11 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
-# Clerk Keys
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
 CLERK_ISSUER = os.getenv("CLERK_ISSUER")
 CLERK_JWKS_URLS = os.getenv("CLERK_JWKS_URL")
-# Plaid Keys
 PLAID_SANDBOX_KEY = os.getenv("PLAID_SANDBOX_KEY")
 PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID")
 
@@ -57,7 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # Add this at the TOP
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -145,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "clerk_app.BudgetBoxUser"
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Your React dev server
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
